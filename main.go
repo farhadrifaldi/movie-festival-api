@@ -41,12 +41,23 @@ func main() {
 		})
 	})
 
-	// Movies API
-	r.GET("/movies", GetMovies)
-	r.POST("/movies", CreateMovie)
-	r.GET("/movies/:id", GetMovieByID)
-	r.PUT("/movies/:id", UpdateMovie)
-	r.DELETE("/movies/:id", DeleteMovie)
+	// Define second API and make query from connected DB
+	userMovieRoute := r.Group("/user/movies")
+	{
+		userMovieRoute.GET("/", GetMovies)
+		userMovieRoute.GET("/:id", GetMovieByID)
+	}
+
+	// Define Router for admin
+	adminRoute := r.Group("/admin")
+	{
+		// Movies API for admin
+		adminRoute.GET("/movies", GetMovies)
+		adminRoute.POST("/movies", CreateMovie)
+		adminRoute.GET("/movies/:id", GetMovieByID)
+		adminRoute.PUT("/movies/:id", UpdateMovie)
+		adminRoute.DELETE("/movies/:id", DeleteMovie)
+	}
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
