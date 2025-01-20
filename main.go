@@ -45,6 +45,7 @@ func main() {
 	r.GET("/movies", GetMovies)
 	r.POST("/movies", CreateMovie)
 	r.GET("/movies/:id", GetMovieByID)
+	r.PUT("/movies/:id", UpdateMovie)
 	r.DELETE("/movies/:id", DeleteMovie)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
@@ -158,6 +159,7 @@ func GetMovies(c *gin.Context) {
 	c.JSON(http.StatusOK, movies)
 }
 
+// Create movie function
 func CreateMovie(c *gin.Context) {
 	var movie MovieInput
 	if err := c.ShouldBindJSON(&movie); err != nil {
@@ -186,6 +188,36 @@ func CreateMovie(c *gin.Context) {
 	c.JSON(http.StatusCreated, movie)
 }
 
+// Update movie by ID
+func UpdateMovie(c *gin.Context) {
+	id := c.Param("id")
+	var movie MovieInput
+	if err := c.ShouldBindJSON(&movie); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	query := `UPDATE movies SET 
+		title = $1,
+		image = $2,
+		description = $3,
+		duration = $4,
+		genres = $5,
+		artists = $6,
+		url = $7,
+		rating = $8,
+		view_count = $9
+	WHERE id = $10`
+
+	// Update movie in the database
+	_, err := conn.Exec(context.Background(), query, movie.Title, movie.Image, movie.Description, movie.Duration, movie.Genres, movie.Artists, movie.URL, movie.Rating, movie.ViewCount, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update movie: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, movie)
+}
+
 // Get movie by ID
 func GetMovieByID(c *gin.Context) {
 	id := c.Param("id")
@@ -203,6 +235,7 @@ func GetMovieByID(c *gin.Context) {
 	c.JSON(http.StatusOK, movie)
 }
 
+// Delete movie by ID
 func DeleteMovie(c *gin.Context) {
 	id := c.Param("id")
 	_, err := conn.Exec(context.Background(), "DELETE FROM movies WHERE id = $1", id)
