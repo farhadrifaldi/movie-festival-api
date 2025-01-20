@@ -1,0 +1,153 @@
+{
+	"info": {
+		"_postman_id": "d611ae9a-86c2-490a-8774-f89d851f41d2",
+		"name": "Movie Festival API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "1719708"
+	},
+	"item": [
+		{
+			"name": "User API",
+			"item": [
+				{
+					"name": "Get Movie for User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/user/movies?page=2&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"movies"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "Cage",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find Movie by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/user/movies/1"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin API",
+			"item": [
+				{
+					"name": "Insert Movie",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"We Are the Best! (Vi är bäst!)\",\r\n  \"image\": \"http://dummyimage.com/400x220.png/dddddd/000000\",\r\n  \"description\": \"hehehe\",\r\n  \"duration\": 1529,\r\n  \"genres\": \"Horor, Adventure, Games\",\r\n  \"artists\": \"Ramsay\",\r\n  \"url\": \"http://mit.edu/lobortis.jpg?tristique=facilisi&in=cras&tempus=non&sit=velit&amet=nec&sem=nisi&fusce=vulputate&consequat=nonummy&nulla=maecenas&nisl=tincidunt&nunc=lacus&nisl=at&duis=velit&bibendum=vivamus\",\r\n  \"view_count\": 100,\r\n  \"rating\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/admin/movies"
+					},
+					"response": []
+				},
+				{
+					"name": "Update movie by ID",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"We Are the Best\",\r\n  \"image\": \"http://dummyimage.com/400x220.png/dddddd/000000\",\r\n  \"description\": \"hahaha\",\r\n  \"duration\": 1000,\r\n  \"genres\": \"Horor, Lala, Games\",\r\n  \"artists\": \"Ramsay\",\r\n  \"url\": \"http://mit.edu/lobortis.jpg?tristique=facilisi&in=cras&tempus=non&sit=velit&amet=nec&sem=nisi&fusce=vulputate&consequat=nonummy&nulla=maecenas&nisl=tincidunt&nunc=lacus&nisl=at&duis=velit&bibendum=vivamus\",\r\n  \"view_count\": 1,\r\n  \"rating\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8080/admin/movies/58"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Movie by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "http://localhost:8080/admin/movies/57"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Movie",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/user/movies?page=2&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"user",
+								"movies"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "Cage",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find Movie by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/user/movies/1"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
