@@ -43,6 +43,7 @@ func main() {
 
 	// Movies API
 	r.GET("/movies", GetMovies)
+	r.GET("/movies/:id", GetMovieByID)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
@@ -120,4 +121,16 @@ func GetMovies(c *gin.Context) {
 		movies = append(movies, movie)
 	}
 	c.JSON(http.StatusOK, movies)
+}
+
+// Get movie by ID
+func GetMovieByID(c *gin.Context) {
+	id := c.Param("id")
+	var movie MovieResponse
+	err := conn.QueryRow(context.Background(), "SELECT id, title, image, description, duration, genres, artists, url, view_count, rating FROM movies WHERE id = $1", id).Scan(&movie.ID, &movie.Title, &movie.Image, &movie.Description, &movie.Duration, &movie.Genres, &movie.Artists, &movie.URL, &movie.ViewCount, &movie.Rating)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Movie not found"})
+		return
+	}
+	c.JSON(http.StatusOK, movie)
 }
