@@ -14,8 +14,6 @@ import (
 var conn *pgx.Conn
 
 func main() {
-	var err error
-
 	db.Init()
 
 	conn = db.GetConn()
