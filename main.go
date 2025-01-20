@@ -43,6 +43,7 @@ func main() {
 
 	// Movies API
 	r.GET("/movies", GetMovies)
+	r.POST("/movies", CreateMovie)
 	r.GET("/movies/:id", GetMovieByID)
 	r.DELETE("/movies/:id", DeleteMovie)
 
@@ -64,6 +65,18 @@ func goDotEnvVariable(key string) string {
 	}
 
 	return os.Getenv(key)
+}
+
+type MovieInput struct {
+	Title       string `json:"title"`
+	Image       string `json:"image"`
+	Description string `json:"description"`
+	Duration    int    `json:"duration"`
+	Genres      string `json:"genres"`
+	Artists     string `json:"artists"`
+	URL         string `json:"url"`
+	Rating      int    `json:"rating"`
+	ViewCount   int    `json:"view_count"`
 }
 
 type MovieResponse struct {
@@ -143,6 +156,34 @@ func GetMovies(c *gin.Context) {
 		movies = append(movies, movie)
 	}
 	c.JSON(http.StatusOK, movies)
+}
+
+func CreateMovie(c *gin.Context) {
+	var movie MovieInput
+	if err := c.ShouldBindJSON(&movie); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	query := `INSERT INTO movies (
+		title,
+		image,
+		description,
+		duration,
+		genres,
+		artists,
+		url,
+		rating,
+		view_count
+	) VALUES ($1, $2, $3,$4, $5, $6, $7, $8, $9)`
+
+	// Insert movie into the database
+	_, err := conn.Exec(context.Background(), query, movie.Title, movie.Image, movie.Description, movie.Duration, movie.Genres, movie.Artists, movie.URL, movie.Rating, movie.ViewCount)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create movie: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, movie)
 }
 
 // Get movie by ID
