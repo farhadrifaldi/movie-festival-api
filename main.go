@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -39,6 +41,9 @@ func main() {
 		})
 	})
 
+	// Movies API
+	r.GET("/movies", GetMovies)
+
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
@@ -57,4 +62,62 @@ func goDotEnvVariable(key string) string {
 	}
 
 	return os.Getenv(key)
+}
+
+type MovieResponse struct {
+	ID          string
+	Title       string
+	Image       string
+	Description string
+	Duration    int // in seconds
+	Genres      string
+	Artists     string
+	URL         string
+	Rating      int
+	ViewCount   int
+}
+
+// Get movie function with page & limit as parameter
+func GetMovies(c *gin.Context) {
+	pageStr := c.Query("page")
+	limitStr := c.Query("limit")
+
+	// Convert page and limit to integers
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1 // default to page 1
+	}
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10 // default limit
+	}
+
+	offset := (page - 1) * limit
+
+	rows, err := conn.Query(context.Background(), "SELECT id, title, image, description, duration, genres, artists, url, view_count, rating FROM movies LIMIT $1 OFFSET $2", limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query: " + err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var movies []MovieResponse
+	for rows.Next() {
+		var movie MovieResponse
+		if err = rows.Scan(&movie.ID,
+			&movie.Title,
+			&movie.Image,
+			&movie.Description,
+			&movie.Duration,
+			&movie.Genres,
+			&movie.Artists,
+			&movie.URL,
+			&movie.ViewCount,
+			&movie.Rating); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row: " + err.Error()})
+			return
+		}
+		movies = append(movies, movie)
+	}
+	c.JSON(http.StatusOK, movies)
 }
