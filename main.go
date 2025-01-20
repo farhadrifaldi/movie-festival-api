@@ -44,6 +44,7 @@ func main() {
 	// Movies API
 	r.GET("/movies", GetMovies)
 	r.GET("/movies/:id", GetMovieByID)
+	r.DELETE("/movies/:id", DeleteMovie)
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
@@ -133,4 +134,14 @@ func GetMovieByID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, movie)
+}
+
+func DeleteMovie(c *gin.Context) {
+	id := c.Param("id")
+	_, err := conn.Exec(context.Background(), "DELETE FROM movies WHERE id = $1", id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete movie: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
 }
