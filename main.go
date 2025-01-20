@@ -81,8 +81,11 @@ type MovieResponse struct {
 
 // Get movie function with page & limit as parameter
 func GetMovies(c *gin.Context) {
+	var err error
+
 	pageStr := c.Query("page")
 	limitStr := c.Query("limit")
+	search := c.Query("search")
 
 	// Convert page and limit to integers
 	page, err := strconv.Atoi(pageStr)
@@ -96,11 +99,29 @@ func GetMovies(c *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	rows, err := conn.Query(context.Background(), "SELECT id, title, image, description, duration, genres, artists, url, view_count, rating FROM movies LIMIT $1 OFFSET $2", limit, offset)
+	var rows pgx.Rows
+	if search != "" {
+		rows, err = conn.Query(context.Background(), `SELECT 
+			id, title, image, description, duration, genres, artists, url, view_count, rating 
+			FROM movies
+			WHERE title ILIKE $1
+			OR description ILIKE $1
+			OR artists ILIKE $1
+			OR genres ILIKE $1
+			LIMIT $2 
+			OFFSET $3`, "%"+search+"%", limit, offset)
+	} else {
+		rows, err = conn.Query(context.Background(), `SELECT 
+			id, title, image, description, duration, genres, artists, url, view_count, rating 
+			FROM movies
+			LIMIT $1 
+			OFFSET $2`, limit, offset)
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute query: " + err.Error()})
 		return
 	}
+
 	defer rows.Close()
 
 	var movies []MovieResponse
@@ -127,8 +148,13 @@ func GetMovies(c *gin.Context) {
 // Get movie by ID
 func GetMovieByID(c *gin.Context) {
 	id := c.Param("id")
+
+	query := `SELECT 
+		id, title, image, description, duration, genres, artists, url, view_count, rating 
+		FROM movies 
+		WHERE id = $1`
 	var movie MovieResponse
-	err := conn.QueryRow(context.Background(), "SELECT id, title, image, description, duration, genres, artists, url, view_count, rating FROM movies WHERE id = $1", id).Scan(&movie.ID, &movie.Title, &movie.Image, &movie.Description, &movie.Duration, &movie.Genres, &movie.Artists, &movie.URL, &movie.ViewCount, &movie.Rating)
+	err := conn.QueryRow(context.Background(), query, id).Scan(&movie.ID, &movie.Title, &movie.Image, &movie.Description, &movie.Duration, &movie.Genres, &movie.Artists, &movie.URL, &movie.ViewCount, &movie.Rating)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Movie not found"})
 		return
